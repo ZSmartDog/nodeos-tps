@@ -46,6 +46,13 @@ public:
         memcpy(((sha256*)pDstData)->hash, pBuffer, sizeof(HashType));
         return make_pair(true, sizeof(HashType));
     }
+    bool operator==(const sha256& a1) {
+        for(auto i = 0; i < 4; i++) {
+            if(a1.hash[i] != hash[i])
+                return false;
+        }
+        return true;
+    }
 };
 
 struct public_key {
@@ -81,6 +88,12 @@ struct public_key {
         auto p = ((vector<char>*)pDstData)->data();
         memcpy(p, (const char*)pBuffer + 1, 33); // 跳过第一个字节（版本信息）
         return make_pair(true, 34);
+    }
+    bool operator==(const public_key& k) {
+        for(auto i=0;i <33;i++) {
+            if(storage[i] != k.storage[i]) return false;
+        }
+        return true;
     }
 };
 
