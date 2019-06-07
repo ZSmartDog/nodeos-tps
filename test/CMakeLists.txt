@@ -1,36 +1,25 @@
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
-execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-if(result)
-    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
-endif()
-execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
-if(result)
-    message(FATAL_ERROR "Build step for googletest failed: ${result}")
-endif()
+cmake_minimum_required(VERSION 3.13)
 
-# Prevent overriding the parent project's compiler/linker
-# settings on Windows
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+project(test)
 
-# Add googletest directly to our build. This defines
-# the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-        ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-        EXCLUDE_FROM_ALL)
+find_package(Boost 1.6.7 REQUIRED)
 
-# Now simply link against gtest or gtest_main as needed. Eg
-add_executable(test main.cpp
-        ../hello/hello.hpp
-        ../hello/hello.cpp
-        ../hello/hello_test.cpp)
+include_directories(${Boost_INCLUDE_DIRS} ../serialization)
 
-target_link_libraries(test gtest_main gmock_main)
-add_test(NAME test_main COMMAND test)
 
-#find_package(Boost 1.6.9 REQUIRED system)
-#target_include_directories(test PUBLIC ${Boost_INCLUDE_DIRS})
-#target_link_libraries(test ${Boost_LIBRARIES})
+set(CMAKE_CXX_STANDARD 17)
+
+add_executable(test test_main.cpp
+                    serialization/serialization_test.cpp
+                    ../serialization/serialization.cpp
+                    ../serialization/serialization.hpp
+                    ../serialization/other_fc.hpp
+                    ../serialization/other_fc.cpp
+                    ../serialization/base58.hpp
+                    ../serialization/base58.cpp)
+
+
+#target_include_directories(test PUBLIC fc/include)
+target_include_directories(test PUBLIC googletest)
+
+target_link_libraries(test gmp serialization gtest pthread ssl crypto)
